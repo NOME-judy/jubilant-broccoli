@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>谁家的过去分词？</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title {
+            color: #2c3e50;
+            margin: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #wordDisplay {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10vw;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+            position: relative;
+            width: 100%;
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            position: fixed;
+            bottom: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 30px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+            background: #2980b9;
+        }
+
+        .deco-icon {
+            position: absolute;
+            opacity: 0.2;
+            font-size: 3em;
+            color: #e74c3c;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .success {
+            background: #2ecc71 !important;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title"><i class="fas fa-book-open"></i> 谁家的过去分词？</h1>
+    
+    <div id="wordDisplay">
+        <div id="word">Ready?</div>
+        <i class="fas fa-pencil-alt deco-icon" style="top:20%;left:15%"></i>
+        <i class="fas fa-heart deco-icon" style="top:70%;right:10%"></i>
+        <i class="fas fa-star deco-icon" style="top:30%;right:20%"></i>
+    </div>
+
+    <div class="controls">
+        <button id="toggleBtn"><i class="fas fa-play"></i> 开始</button>
+        <button id="importBtn"><i class="fas fa-file-import"></i> 导入单词</button>
+        <input type="file" id="fileInput" accept=".txt">
+    </div>
+
+    <script>
+        let words = [];
+        let intervalId = null;
+        let isRunning = false;
+
+        // 初始示例单词
+        const sampleWords = ["begin-began-begun", "sing-sang-sung", "write-wrote-written"];
+        
+        // 从localStorage加载单词
+        function loadWords() {
+            const saved = localStorage.getItem('pastParticipleWords');
+            words = saved ? JSON.parse(saved) : sampleWords;
+        }
+
+        function updateDisplay() {
+            const wordElement = document.getElementById('word');
+            wordElement.textContent = words[Math.floor(Math.random() * words.length)];
+        }
+
+        document.getElementById('toggleBtn').addEventListener('click', function() {
+            isRunning = !isRunning;
+            this.innerHTML = isRunning ? '<i class="fas fa-pause"></i> 暂停' : '<i class="fas fa-play"></i> 开始';
+            
+            if(isRunning) {
+                intervalId = setInterval(updateDisplay, 1);
+            } else {
+                clearInterval(intervalId);
+            }
+        });
+
+        document.getElementById('importBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    words = e.target.result.split('\n').filter(line => line.trim());
+                    localStorage.setItem('pastParticipleWords', JSON.stringify(words));
+                    document.getElementById('importBtn').classList.add('success');
+                    setTimeout(() => {
+                        document.getElementById('importBtn').classList.remove('success');
+                    }, 2000);
+                }
+                reader.readAsText(file);
+            }
+        });
+
+        // 初始化
+        loadWords();
+        updateDisplay();
+    </script>
+</body>
+</html>
